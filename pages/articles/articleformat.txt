@@ -1,0 +1,35 @@
+// Author: Jakob Rose
+import Header from '../../components/Header';
+import MainMenu from '../../components/MainMenu';
+import Footer from '../../components/Footer';
+import { fetchArticles } from '../../utils/fetchArticles';
+
+export async function getStaticPaths() {
+  const articles = await fetchArticles();
+  return {
+    paths: articles.map(a => ({ params: { slug: a.slug } })),
+    fallback: false,
+  };
+}
+
+export async function getStaticProps({ params }) {
+  const articles = await fetchArticles();
+  const article = articles.find(a => a.slug === params.slug);
+  return { props: { article } };
+}
+
+export default function ArticlePage({ article }) {
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <Header />
+      <MainMenu />
+      <div className="max-w-3xl mx-auto my-8 bg-white p-6 rounded shadow">
+        <img src={article.featuredImage || "/logo.png"} alt={article.title} className="rounded w-full mb-4" />
+        <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
+        <p className="text-sm mb-6">By {article.author}</p>
+        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: article.content }} />
+      </div>
+      <Footer />
+    </div>
+  );
+}
